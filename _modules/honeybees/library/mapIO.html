@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>honeybees.library.mapIO &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../../copyright.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../artists.html">Artists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reporting.html">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/mapIO.html">MapIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/raster.html">Raster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/geohash.html">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>honeybees.library.mapIO</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for honeybees.library.mapIO</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Submodule that implements several classes for reading maps (image type and NetCDF type).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">floor</span>
+<span class="kn">from</span> <span class="nn">netCDF4</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">num2date</span>
+<span class="kn">from</span> <span class="nn">honeybees.library.raster</span> <span class="kn">import</span> <span class="n">sample_from_map</span><span class="p">,</span> <span class="n">write_to_array</span>
+<span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">mask</span>
+<span class="kn">from</span> <span class="nn">rasterio.windows</span> <span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">getcallargs</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<div class="viewcode-block" id="MapReader"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.MapReader">[docs]</a><span class="k">class</span> <span class="nc">MapReader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This is a base class to read mapdata from files. The class takes as input the bounds of the relevant area. Any input maps are automatically cut to only read the required area. The class contains several functions to make reading data per agent easy and fast.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bounds: tuple of xmin, xmax, ymin, ymax of study_area.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xmin</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xmax</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ymin</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ymax</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+<div class="viewcode-block" id="MapReader.get_source_gt"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.MapReader.get_source_gt">[docs]</a>    <span class="k">def</span> <span class="nf">get_source_gt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get Geotransformation of the source file. Must be implemented in the child class.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">get_data_array</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read data array. Must be implemented in child class.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="MapReader.set_window_and_gt"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.MapReader.set_window_and_gt">[docs]</a>    <span class="k">def</span> <span class="nf">set_window_and_gt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This function gets the geotransformation (gt) of the cut map, and the rows to read from the original data (rowslice, colslice).&quot;&quot;&quot;</span>
+        <span class="n">gt_ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_source_gt</span><span class="p">()</span>
+        <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># y, x</span>
+        
+        <span class="n">colmin</span> <span class="o">=</span> <span class="n">floor</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">colmax</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colslice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">colmin</span><span class="p">,</span> <span class="n">colmax</span><span class="p">)</span>
+        
+        <span class="n">rowmin</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">rowmax</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ymin</span> <span class="o">-</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="c1"># Detect if array is flipped upside down. If so, reverse rowmin and rowmax and use self.flipup to flip array when returned</span>
+        <span class="k">if</span> <span class="n">rowmin</span> <span class="o">&gt;</span> <span class="n">rowmax</span><span class="p">:</span>
+            <span class="n">rowmin</span><span class="p">,</span> <span class="n">rowmax</span> <span class="o">=</span> <span class="n">rowmax</span><span class="p">,</span> <span class="n">rowmin</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flipud</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flipud</span> <span class="o">=</span> <span class="kc">False</span>
+        
+        <span class="n">rowmin</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">rowmin</span><span class="p">)</span>
+        <span class="n">rowmax</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">rowmax</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">rowslice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">rowmin</span><span class="p">,</span> <span class="n">rowmax</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">colmin</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">rowmin</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gt</span> <span class="o">=</span> <span class="p">(</span><span class="n">gt_ds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">colmin</span> <span class="o">*</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">rowmin</span> <span class="o">*</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">gt_ds</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="MapReader.sample_coords"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.MapReader.sample_coords">[docs]</a>    <span class="k">def</span> <span class="nf">sample_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            coords: 2D NumPy array of coordinates to sample. First dimension is a list of coordinates, second dimension are the x and y.</span>
+<span class="sd">            *args: Variable length argument list.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            data: values as read from map for given coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_array</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sample_from_map</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gt</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MapReader.get_data_array"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.MapReader.get_data_array">[docs]</a>    <span class="k">def</span> <span class="nf">get_data_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read data array from map.</span>
+
+<span class="sd">            Parameters:</span>
+<span class="sd">                cache (bool): cache output from previous call to function, check parameters (default: False)</span>
+<span class="sd">                args: passed to child _get_data_array</span>
+<span class="sd">                kwargs: passed to child _get_data_array</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                array: requested array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
+            <span class="n">call_args</span> <span class="o">=</span> <span class="n">getcallargs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_data_array</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">call_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;kwargs&#39;</span> <span class="ow">in</span> <span class="n">call_args</span><span class="p">:</span>
+                <span class="n">call_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">call_args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;kwargs&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;get_data_array_cache_args&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">call_args</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_array_cache_args</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data_array_cache</span>
+
+        <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data_array</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_data_array_cache</span> <span class="o">=</span> <span class="n">array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_data_array_cache_args</span> <span class="o">=</span> <span class="n">call_args</span>
+        <span class="k">return</span> <span class="n">array</span></div>
+
+<div class="viewcode-block" id="MapReader.delete_get_data_array_cache"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.MapReader.delete_get_data_array_cache">[docs]</a>    <span class="k">def</span> <span class="nf">delete_get_data_array_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;If results from get_data_array were cached, these can be deleted using this function.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;get_data_array_cache&#39;</span><span class="p">):</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;get_data_array_cache&#39;</span><span class="p">)</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;get_data_array_cache_args&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ArrayReader"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.ArrayReader">[docs]</a><span class="k">class</span> <span class="nc">ArrayReader</span><span class="p">(</span><span class="n">MapReader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class can be used to read image type data from files, and then to easily sample data from it.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        fp: Filepath of file.</span>
+<span class="sd">        bounds: tuple of xmin, xmax, ymin, ymax of study_area.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">MapReader</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">fp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_window_and_gt</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ArrayReader.get_source_gt"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.ArrayReader.get_source_gt">[docs]</a>    <span class="k">def</span> <span class="nf">get_source_gt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get geotransformation of the source file.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            gt: Geotransformation of source file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">to_gdal</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get shape of source file.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            height: height of array.</span>
+<span class="sd">            width: width of array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">def</span> <span class="nf">_get_data_array</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read array from file for study_area.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            data: Array of data for study_area.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">Window</span><span class="o">.</span><span class="n">from_slices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowslice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">colslice</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+
+<div class="viewcode-block" id="ArrayReader.sample_geom"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.ArrayReader.sample_geom">[docs]</a>    <span class="k">def</span> <span class="nf">sample_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geom</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nodata</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Sample geometry from array.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            geom: GeoJSON dictionary of geometry.</span>
+<span class="sd">            nodata: Value to fill nodata.</span>
+<span class="sd">            all_touched: Bool to include a pixel in the mask if it touches any of the shapes. </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            data: Values for geometry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;geometry&#39;</span> <span class="ow">in</span> <span class="n">geom</span> <span class="k">else</span> <span class="n">geom</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">,</span> <span class="p">[</span><span class="n">geom</span><span class="p">],</span> <span class="n">crop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>        </div>
+
+<div class="viewcode-block" id="ArrayReader.sample_geoms"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.ArrayReader.sample_geoms">[docs]</a>    <span class="k">def</span> <span class="nf">sample_geoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geoms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">nodata</span><span class="p">:</span> <span class="nb">int</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sample multiple geometries from data array.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            geoms: List of GeoJSON dictionary of geometries.</span>
+<span class="sd">            nodata: Value to fill nodata.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            data: Values for geometry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">geoms</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_geom</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="NetCDFReader"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.NetCDFReader">[docs]</a><span class="k">class</span> <span class="nc">NetCDFReader</span><span class="p">(</span><span class="n">MapReader</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">latname</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="n">lonname</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span> <span class="n">timename</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This class can be used to read data from NetCDF files, and then to easily sample data from it.</span>
+<span class="sd">    </span>
+<span class="sd">        Args:</span>
+<span class="sd">            fp: Filepath of file.</span>
+<span class="sd">            varname: netcdf variable to read</span>
+<span class="sd">            bounds: tuple of xmin, xmax, ymin, ymax of study_area.</span>
+<span class="sd">            latname: name of latitude variable</span>
+<span class="sd">            lonname: name of longitude variable</span>
+<span class="sd">            timename: name of the time variable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">fp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latname</span> <span class="o">=</span> <span class="n">latname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lonname</span> <span class="o">=</span> <span class="n">lonname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timename</span> <span class="o">=</span> <span class="n">timename</span>
+
+        <span class="n">MapReader</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">set_always_mask</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">varname</span><span class="si">}</span><span class="s1"> not found in NetCDF. Possible variables are </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_window_and_gt</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_current_time_index</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Title of NetCDF file.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">title</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">source_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get shape of source file.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            height: height of array.</span>
+<span class="sd">            width: width of array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">latname</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lonname</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+<div class="viewcode-block" id="NetCDFReader.get_source_gt"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.NetCDFReader.get_source_gt">[docs]</a>    <span class="k">def</span> <span class="nf">get_source_gt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct a GDAL-style Geotransformation from the source NetCDF using the longitude and latitude data.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            gt: Geotransformation of source file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">latname</span><span class="p">][:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lonname</span><span class="p">][:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">ys</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Assert NetCDF has a regular spaced grid</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ys</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">ys</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">xs</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">xs</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e6</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">xs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span>
+            <span class="n">dx</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">ys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">dy</span>
+        <span class="p">)</span>  <span class="c1"># rotation is always 0</span></div>
+
+<div class="viewcode-block" id="NetCDFReader.get_current_time_index"><a class="viewcode-back" href="../../../library/mapIO.html#honeybees.library.mapIO.NetCDFReader.get_current_time_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_time_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read the time indices from NetCDF file in Python datetime format. If time index does not exist, it is not set.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">timename</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">datetimes</span> <span class="o">=</span> <span class="p">[</span><span class="n">num2date</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">times</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="n">times</span><span class="o">.</span><span class="n">calendar</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">times</span><span class="p">[:]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">datetimes</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_data_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read data array from NetCDF file for study_area.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dt: Datetime to read. Required if data has time dimension, otherwise should not be given.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            data: Array of data for study_area.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetimes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dt</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must specify datetime for NetCDF with time component by passing dt-argument to the function call.&quot;</span><span class="p">)</span>
+            <span class="n">time_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetimes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">time_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowslice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">colslice</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">dt</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rowslice</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">colslice</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flipud</span><span class="p">:</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">array</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

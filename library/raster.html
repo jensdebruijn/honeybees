@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raster &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="Geohash" href="geohash.html" />
+    <link rel="prev" title="MapIO" href="mapIO.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../artists.html">Artists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reporting.html">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mapIO.html">MapIO</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Raster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geohash.html">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Raster</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/library/raster.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-honeybees.library.raster">
+<span id="raster"></span><h1>Raster<a class="headerlink" href="#module-honeybees.library.raster" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="honeybees.library.raster.CreateNetCDF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateNetCDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">institution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression_level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#CreateNetCDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.CreateNetCDF" title="Permalink to this definition"></a></dt>
+<dd><p>Class to create easy create a spatial NetCDF-file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fn</strong> – Filepath.</p></li>
+<li><p><strong>title</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Title of NetCDF.</p></li>
+<li><p><strong>source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Source of data.</p></li>
+<li><p><strong>institution</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Institution where data was created.</p></li>
+<li><p><strong>n_timesteps</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Number of timesteps in NetCDF. None if NetCDF should not have time dimension.</p></li>
+<li><p><strong>lons</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array of longitudes.</p></li>
+<li><p><strong>lats</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array of latitudes.</p></li>
+<li><p><strong>epsg</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – EPSG code.</p></li>
+<li><p><strong>varname</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of variable to store.</p></li>
+<li><p><strong>units</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Unit of variable.</p></li>
+<li><p><strong>dtype</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – NetCDF dtype. See NetCDF documentation for valid dtypes: <a class="reference external" href="https://unidata.github.io/netcdf4-python/">https://unidata.github.io/netcdf4-python/</a></p></li>
+<li><p><strong>chunksizes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Sizes of datachunks. (time, lat, lon) if time dimension exists, otherwise (lat, lon).</p></li>
+<li><p><strong>fill_value</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Value to represent nodata.</p></li>
+<li><p><strong>compression_level</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – NetCDF compression level (1-9)</p></li>
+<li><p><strong>comment</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Optional dataset comment.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.raster.CreateNetCDF.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#CreateNetCDF.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.CreateNetCDF.write" title="Permalink to this definition"></a></dt>
+<dd><p>Write layer to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Values to write.</p></li>
+<li><p><strong>dt</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>]) – Optional datetime to write. If NetCDF has no time dimension, do not write.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="honeybees.library.raster.NetCDFHasEmtpyLayersException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NetCDFHasEmtpyLayersException</span></span><a class="reference internal" href="../_modules/honeybees/library/raster.html#NetCDFHasEmtpyLayersException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.NetCDFHasEmtpyLayersException" title="Permalink to this definition"></a></dt>
+<dd><p>Raised when one or more layers are empty</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.clip_to_other">
+<span class="sig-name descname"><span class="pre">clip_to_other</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_profile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#clip_to_other"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.clip_to_other" title="Permalink to this definition"></a></dt>
+<dd><p>Clip array to rasterio profile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array to clip.</p></li>
+<li><p><strong>src_profile</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Profile</span></code>) – Rasterio profile of source array.</p></li>
+<li><p><strong>other_profile</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Profile</span></code>) – Rasterio profile of array to clip to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>outarray</strong> – Clipped array.</p></li>
+<li><p><strong>profile</strong> – Updated profile.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Profile</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.clip_to_xy_bounds">
+<span class="sig-name descname"><span class="pre">clip_to_xy_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#clip_to_xy_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.clip_to_xy_bounds" title="Permalink to this definition"></a></dt>
+<dd><p>Clips rasterio dataset to given bounds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetReader</span></code>) – Rasterio dataset.</p></li>
+<li><p><strong>profile</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Profile</span></code>) – Rasterio profile of dataset.</p></li>
+<li><p><strong>array</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array to clip.</p></li>
+<li><p><strong>xmin</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Minimum xbound.</p></li>
+<li><p><strong>xmax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Maximum xbound.</p></li>
+<li><p><strong>ymin</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Minimum ybound.</p></li>
+<li><p><strong>ymax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Maximum ybound.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>profile</strong> – Updated profile for cut array.</p></li>
+<li><p><strong>array</strong> – Array data.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.coord_to_pixel">
+<span class="sig-name descname"><span class="pre">coord_to_pixel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#coord_to_pixel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.coord_to_pixel" title="Permalink to this definition"></a></dt>
+<dd><p>Converts coordinate to pixel (x, y) for given geotransformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coord</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – the coordinate (lon, lat) that need to be transformed to pixel</p></li>
+<li><p><strong>gt</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – the geotransformation. Must be unrotated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>array</strong> – tuple of pixel (x, y)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.coords_to_pixels">
+<span class="sig-name descname"><span class="pre">coords_to_pixels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.uint32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#coords_to_pixels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.coords_to_pixels" title="Permalink to this definition"></a></dt>
+<dd><p>Converts array of coordinates to array of pixels for given geotransformation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> – the coordinates (lon, lat) that need to be transformed to pixels (shape: 2, n)</p></li>
+<li><p><strong>gt</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>) – the geotransformation. Must be unrotated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>array</strong> – 2d-array of pixels per coordinate (shape: 2, n)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.pixel_to_coord">
+<span class="sig-name descname"><span class="pre">pixel_to_coord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">py</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#pixel_to_coord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.pixel_to_coord" title="Permalink to this definition"></a></dt>
+<dd><p>Converts pixel (x, y) to coordinate (lon, lat) for given geotransformation.
+Uses the upper left corner of the pixel. To use the center, add 0.5 to input pixel.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>pixel: the pixel (x, y) that need to be transformed to coordinate
+gt: the geotransformation. Must be unrotated</p>
+</dd>
+<dt>Returns:</dt><dd><p>array: the coordinate (lon, lat)</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.pixels_to_coords">
+<span class="sig-name descname"><span class="pre">pixels_to_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pixels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#pixels_to_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.pixels_to_coords" title="Permalink to this definition"></a></dt>
+<dd><p>Converts pixels (x, y) to coordinates (lon, lat) for given geotransformation.
+Uses the upper left corner of the pixels. To use the centers, add 0.5 to input pixels.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>pixels: the pixels (x, y) that need to be transformed to coordinates (shape: 2, n)
+gt: the geotransformation. Must be unrotated</p>
+</dd>
+<dt>Returns:</dt><dd><p>array: the coordinates (lon, lat) (shape: 2, n)</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.reproject_pixel">
+<span class="sig-name descname"><span class="pre">reproject_pixel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gt_from</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt_to</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">px_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">py_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#reproject_pixel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.reproject_pixel" title="Permalink to this definition"></a></dt>
+<dd><p>Reproject pixel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gt_from</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Orginal geotransformation.</p></li>
+<li><p><strong>gt_to</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Target geotransformation.</p></li>
+<li><p><strong>px_in</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Input xpixel.</p></li>
+<li><p><strong>py_in</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Input ypixel.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.sample_from_map">
+<span class="sig-name descname"><span class="pre">sample_from_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#sample_from_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.sample_from_map" title="Permalink to this definition"></a></dt>
+<dd><p>Sample coordinates from a map. Can handle multiple dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – the map to sample from (2+n dimensions)</p></li>
+<li><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – the coordinates used to sample (shape: 2, m)</p></li>
+<li><p><strong>gt</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – the geotransformation. Must be unrotated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>array</strong> – values per coordinate</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.upscale">
+<span class="sig-name descname"><span class="pre">upscale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#upscale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.upscale" title="Permalink to this definition"></a></dt>
+<dd><p>“Upscale array and rasterio profile by x amount.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array to upscale.</p></li>
+<li><p><strong>src_profile</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Rasterio profile of source array.</p></li>
+<li><p><strong>factor</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Factor by which to upscale.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>array</strong> – Upscaled array.</p></li>
+<li><p><strong>profile</strong> – Updated rasterio profile.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Profile</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.raster.write_to_array">
+<span class="sig-name descname"><span class="pre">write_to_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/raster.html#write_to_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.raster.write_to_array" title="Permalink to this definition"></a></dt>
+<dd><p>Write values using coordinates to a map. If multiple coordinates map to a single cell,
+the values are added. The operation is inplace</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Parameters:</dt><dd><p>array: the 2-dimensional array to write to
+values: the values to write (shape: n)
+coords: the coordinates of the values (shape: 2, n)
+gt: the geotransformation. Must be unrotated</p>
+</dd>
+<dt>Returns:</dt><dd><p>array: the array with the values added (operation is inplace)</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mapIO.html" class="btn btn-neutral float-left" title="MapIO" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geohash.html" class="btn btn-neutral float-right" title="Geohash" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapIO &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="Raster" href="raster.html" />
+    <link rel="prev" title="Command line arguments" href="../command_line_args.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../artists.html">Artists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reporting.html">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MapIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="raster.html">Raster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geohash.html">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>MapIO</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/library/mapIO.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-honeybees.library.mapIO">
+<span id="mapio"></span><h1>MapIO<a class="headerlink" href="#module-honeybees.library.mapIO" title="Permalink to this heading"></a></h1>
+<p>Submodule that implements several classes for reading maps (image type and NetCDF type).</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.ArrayReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ArrayReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#ArrayReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.ArrayReader" title="Permalink to this definition"></a></dt>
+<dd><p>This class can be used to read image type data from files, and then to easily sample data from it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fp</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Filepath of file.</p></li>
+<li><p><strong>bounds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – tuple of xmin, xmax, ymin, ymax of study_area.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.ArrayReader.get_source_gt">
+<span class="sig-name descname"><span class="pre">get_source_gt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#ArrayReader.get_source_gt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.ArrayReader.get_source_gt" title="Permalink to this definition"></a></dt>
+<dd><p>Get geotransformation of the source file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>gt</strong> – Geotransformation of source file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.ArrayReader.sample_geom">
+<span class="sig-name descname"><span class="pre">sample_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_touched</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#ArrayReader.sample_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.ArrayReader.sample_geom" title="Permalink to this definition"></a></dt>
+<dd><p>Sample geometry from array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – GeoJSON dictionary of geometry.</p></li>
+<li><p><strong>nodata</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Value to fill nodata.</p></li>
+<li><p><strong>all_touched</strong> – Bool to include a pixel in the mask if it touches any of the shapes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>data</strong> – Values for geometry.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.ArrayReader.sample_geoms">
+<span class="sig-name descname"><span class="pre">sample_geoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#ArrayReader.sample_geoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.ArrayReader.sample_geoms" title="Permalink to this definition"></a></dt>
+<dd><p>Sample multiple geometries from data array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geoms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – List of GeoJSON dictionary of geometries.</p></li>
+<li><p><strong>nodata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Value to fill nodata.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><p><em>data</em> – Values for geometry.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.ArrayReader.source_shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#honeybees.library.mapIO.ArrayReader.source_shape" title="Permalink to this definition"></a></dt>
+<dd><p>Get shape of source file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>height</strong> – height of array.</p></li>
+<li><p><strong>width</strong> – width of array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.MapReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MapReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#MapReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.MapReader" title="Permalink to this definition"></a></dt>
+<dd><p>This is a base class to read mapdata from files. The class takes as input the bounds of the relevant area. Any input maps are automatically cut to only read the required area. The class contains several functions to make reading data per agent easy and fast.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bounds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – tuple of xmin, xmax, ymin, ymax of study_area.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.MapReader.delete_get_data_array_cache">
+<span class="sig-name descname"><span class="pre">delete_get_data_array_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#MapReader.delete_get_data_array_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.MapReader.delete_get_data_array_cache" title="Permalink to this definition"></a></dt>
+<dd><p>If results from get_data_array were cached, these can be deleted using this function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.MapReader.get_data_array">
+<span class="sig-name descname"><span class="pre">get_data_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#MapReader.get_data_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.MapReader.get_data_array" title="Permalink to this definition"></a></dt>
+<dd><p>Read data array from map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache</strong> (<em>bool</em>) – cache output from previous call to function, check parameters (default: False)</p></li>
+<li><p><strong>args</strong> – passed to child _get_data_array</p></li>
+<li><p><strong>kwargs</strong> – passed to child _get_data_array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>array</strong> – requested array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.MapReader.get_source_gt">
+<span class="sig-name descname"><span class="pre">get_source_gt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#MapReader.get_source_gt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.MapReader.get_source_gt" title="Permalink to this definition"></a></dt>
+<dd><p>Get Geotransformation of the source file. Must be implemented in the child class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.MapReader.sample_coords">
+<span class="sig-name descname"><span class="pre">sample_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#MapReader.sample_coords"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.MapReader.sample_coords" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – 2D NumPy array of coordinates to sample. First dimension is a list of coordinates, second dimension are the x and y.</p></li>
+<li><p><strong>*args</strong> – Variable length argument list.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>data</strong> – values as read from map for given coordinates.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.MapReader.set_window_and_gt">
+<span class="sig-name descname"><span class="pre">set_window_and_gt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#MapReader.set_window_and_gt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.MapReader.set_window_and_gt" title="Permalink to this definition"></a></dt>
+<dd><p>This function gets the geotransformation (gt) of the cut map, and the rows to read from the original data (rowslice, colslice).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.NetCDFReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NetCDFReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lonname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lon'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#NetCDFReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.NetCDFReader" title="Permalink to this definition"></a></dt>
+<dd><p>This class can be used to read data from NetCDF files, and then to easily sample data from it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fp</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Filepath of file.</p></li>
+<li><p><strong>varname</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – netcdf variable to read</p></li>
+<li><p><strong>bounds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>) – tuple of xmin, xmax, ymin, ymax of study_area.</p></li>
+<li><p><strong>latname</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of latitude variable</p></li>
+<li><p><strong>lonname</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of longitude variable</p></li>
+<li><p><strong>timename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the time variable</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.NetCDFReader.get_current_time_index">
+<span class="sig-name descname"><span class="pre">get_current_time_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#NetCDFReader.get_current_time_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.NetCDFReader.get_current_time_index" title="Permalink to this definition"></a></dt>
+<dd><p>Read the time indices from NetCDF file in Python datetime format. If time index does not exist, it is not set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.NetCDFReader.get_source_gt">
+<span class="sig-name descname"><span class="pre">get_source_gt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/mapIO.html#NetCDFReader.get_source_gt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.mapIO.NetCDFReader.get_source_gt" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a GDAL-style Geotransformation from the source NetCDF using the longitude and latitude data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>gt</strong> – Geotransformation of source file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.NetCDFReader.source_shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_shape</span></span><a class="headerlink" href="#honeybees.library.mapIO.NetCDFReader.source_shape" title="Permalink to this definition"></a></dt>
+<dd><p>Get shape of source file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>height</strong> – height of array.</p></li>
+<li><p><strong>width</strong> – width of array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="honeybees.library.mapIO.NetCDFReader.title">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#honeybees.library.mapIO.NetCDFReader.title" title="Permalink to this definition"></a></dt>
+<dd><p>Title of NetCDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../command_line_args.html" class="btn btn-neutral float-left" title="Command line arguments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="raster.html" class="btn btn-neutral float-right" title="Raster" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

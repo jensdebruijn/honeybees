@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>honeybees.library.geohash &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../../copyright.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../artists.html">Artists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reporting.html">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/mapIO.html">MapIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/raster.html">Raster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/geohash.html">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>honeybees.library.geohash</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for honeybees.library.geohash</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Submodule that implements several functions for geohashing. Inspired by https://www.factual.com/blog/how-geohashes-work/.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span><span class="p">,</span> <span class="n">prange</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">cos</span><span class="p">,</span> <span class="n">radians</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="n">RADIUS_EARTH_EQUATOR</span> <span class="o">=</span> <span class="mi">40075017</span>  <span class="c1"># m</span>
+<span class="n">DISTANCE_1_DEGREE_LATITUDE</span> <span class="o">=</span> <span class="n">RADIUS_EARTH_EQUATOR</span> <span class="o">/</span> <span class="mi">360</span>  <span class="c1"># m</span>
+
+<div class="viewcode-block" id="encode_locations"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.encode_locations">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">encode_locations</span><span class="p">(</span><span class="n">locations</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">minx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">maxx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">miny</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">maxy</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Geohash 2d-array of locations.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        locations: 2d array of locations x and y locations.</span>
+<span class="sd">        minx: Minimum x-value of the entire relevant space.</span>
+<span class="sd">        maxx: Maximum x-value of the entire relevant space.</span>
+<span class="sd">        miny: Minimum y-value of the entire relevant space.</span>
+<span class="sd">        miny: Maximum y-value of the entire relevant space.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        hashcodes: Geohash codes array for all locations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hashcodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">hashcodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">encode</span><span class="p">(</span><span class="n">locations</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">locations</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hashcodes</span></div>
+
+<div class="viewcode-block" id="reduce_precision"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.reduce_precision">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">reduce_precision</span><span class="p">(</span><span class="n">geohashes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reduces the precision of input geohashes.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        geohashes: Array of geohashes.</span>
+<span class="sd">        bits: Required number of bits for output geohashes</span>
+<span class="sd">        inplace: If true, the operation is executed in place, otherwise a new array is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">precision_tag</span> <span class="o">=</span> <span class="n">get_precision_tag</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
+        <span class="n">geohashes_reduced_precision</span> <span class="o">=</span> <span class="n">geohashes</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">geohashes_reduced_precision</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">geohashes</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">geohashes</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">geohashes_reduced_precision</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">geohashes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="mi">61</span> <span class="o">-</span> <span class="n">bits</span><span class="p">)</span> <span class="o">|</span> <span class="n">precision_tag</span>
+    <span class="k">return</span> <span class="n">geohashes_reduced_precision</span></div>
+
+<div class="viewcode-block" id="get_precision_tag"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.get_precision_tag">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_precision_tag</span><span class="p">(</span><span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get a 64-bit integer that can be ORed with a geohash. This is done by setting the most-significant bit to 1.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        bits: Number of bits wanted for resulting geohash.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        precision_tag: 64-bit integer that can be ORed with geohash to set precision.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x4000000000000000</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">bits</span></div>
+
+<div class="viewcode-block" id="widen"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.widen">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">widen</span><span class="p">(</span><span class="n">bitstring</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;To interleave the x and y pair of the geohash we `widen` the bit-values by inserting a 0 value to the left of each of the bits.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        bitstring: Geohash of x or y only.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        interleaved_bitstring: Interleaved geohash of x or y.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bitstring</span> <span class="o">|=</span> <span class="n">bitstring</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x0000ffff0000ffff</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">|=</span> <span class="n">bitstring</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x00ff00ff00ff00ff</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">|=</span> <span class="n">bitstring</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x0f0f0f0f0f0f0f0f</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">|=</span> <span class="n">bitstring</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x3333333333333333</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">|=</span> <span class="n">bitstring</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x5555555555555555</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bitstring</span></div>
+
+<div class="viewcode-block" id="unwiden"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.unwiden">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">unwiden</span><span class="p">(</span><span class="n">bitstring</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;To unpack a geohash in its x and y pair, the inverse of widen needs to happen. This function removes a bit from the left of each other bit.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        bitstring: Widened bitstring.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        unwidened_bitstring: Unwidened bitstring.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x5555555555555555</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">^=</span> <span class="n">bitstring</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x3333333333333333</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">^=</span> <span class="n">bitstring</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x0f0f0f0f0f0f0f0f</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">^=</span> <span class="n">bitstring</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x00ff00ff00ff00ff</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">^=</span> <span class="n">bitstring</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x0000ffff0000ffff</span><span class="p">)</span>
+    <span class="n">bitstring</span> <span class="o">^=</span> <span class="n">bitstring</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span>
+    <span class="n">bitstring</span> <span class="o">&amp;=</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x00000000ffffffff</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bitstring</span></div>
+
+<div class="viewcode-block" id="encode_precision"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.encode_precision">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">nb</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">nb</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="s1">&#39;bits&#39;</span><span class="p">:</span> <span class="n">nb</span><span class="o">.</span><span class="n">int16</span><span class="p">})</span>
+<span class="k">def</span> <span class="nf">encode_precision</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">minx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">180</span><span class="p">,</span> <span class="n">maxx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">miny</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">maxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Geohashes a x/y pair for given precision in bits.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x: x-value.</span>
+<span class="sd">        y: y-value.</span>
+<span class="sd">        bits: Precision for geohash.</span>
+<span class="sd">        minx: Minimum x-value of the entire relevant space.</span>
+<span class="sd">        maxx: Maximum x-value of the entire relevant space.</span>
+<span class="sd">        miny: Minimum y-value of the entire relevant space.</span>
+<span class="sd">        miny: Maximum y-value of the entire relevant space.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        geohash: Geohash for x/y pair.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">encode</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="mi">61</span> <span class="o">-</span> <span class="n">bits</span><span class="p">)</span> <span class="o">|</span> <span class="n">get_precision_tag</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="encode"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.encode">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">nb</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">nb</span><span class="o">.</span><span class="n">float64</span><span class="p">})</span>
+<span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">minx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">180</span><span class="p">,</span> <span class="n">maxx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">miny</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">maxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">90</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Geohashes a x/y pair.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x: x-value.</span>
+<span class="sd">        y: y-value.</span>
+<span class="sd">        minx: Minimum x-value of the entire relevant space.</span>
+<span class="sd">        maxx: Maximum x-value of the entire relevant space.</span>
+<span class="sd">        miny: Minimum y-value of the entire relevant space.</span>
+<span class="sd">        miny: Maximum y-value of the entire relevant space.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        geohash: Geohash for x/y pair.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">widen</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">maxx</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x80000000</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">minx</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x7fffffff</span><span class="p">))</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">widen</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">((</span><span class="n">y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="n">maxy</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x80000000</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">maxy</span> <span class="o">-</span> <span class="n">miny</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x7fffffff</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ys</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span> <span class="o">|</span> <span class="n">xs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="decode"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.decode">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;shifted&#39;</span><span class="p">:</span> <span class="n">nb</span><span class="o">.</span><span class="n">int64</span><span class="p">})</span>
+<span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">gh</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">minx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">180</span><span class="p">,</span> <span class="n">maxx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">miny</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">maxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Decodes a geohashes into x/y pair for given precision in bits.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        gh: Geohash</span>
+<span class="sd">        bits: Precision for geohash.</span>
+<span class="sd">        minx: Minimum x-value of the entire relevant space.</span>
+<span class="sd">        maxx: Maximum x-value of the entire relevant space.</span>
+<span class="sd">        miny: Minimum y-value of the entire relevant space.</span>
+<span class="sd">        miny: Maximum y-value of the entire relevant space.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        x: Decoded x-value</span>
+<span class="sd">        y: Decoded y-value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">shifted</span> <span class="o">=</span> <span class="n">gh</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="mi">61</span> <span class="o">-</span> <span class="n">bits</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">unwiden</span><span class="p">(</span><span class="n">shifted</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x3fffffff</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x40000000</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">maxy</span> <span class="o">-</span> <span class="n">miny</span><span class="p">)</span> <span class="o">+</span> <span class="n">miny</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">unwiden</span><span class="p">(</span><span class="n">shifted</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x7fffffff</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x80000000</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">minx</span><span class="p">)</span> <span class="o">+</span> <span class="n">minx</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="shift"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.shift">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">shift</span><span class="p">(</span><span class="n">gh</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dy</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shifts a geohash by number of windows in given x and y-direction.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        gh: Geohash</span>
+<span class="sd">        bits: Precision for geohash.</span>
+<span class="sd">        dx: Number of windows to shift in x-direction. Can be negative.</span>
+<span class="sd">        dy. Number of windows to shift in y-direction. Can be negative.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gh: Shifted geohash.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">bits</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">dy</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">dx</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sx</span> <span class="o">=</span> <span class="n">dx</span>
+        <span class="n">sy</span> <span class="o">=</span> <span class="n">dy</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">widen</span><span class="p">(</span><span class="n">unwiden</span><span class="p">(</span><span class="n">gh</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">sy</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span> <span class="o">|</span> <span class="n">widen</span><span class="p">(</span><span class="n">unwiden</span><span class="p">(</span><span class="n">gh</span><span class="p">)</span> <span class="o">+</span> <span class="n">sx</span><span class="p">))</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">bits</span><span class="p">)</span> <span class="o">|</span> <span class="n">get_precision_tag</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="shift_multiple"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.shift_multiple">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">shift_multiple</span><span class="p">(</span><span class="n">gh</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">shifts</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Shifts a geohash by number of windows in given x and y-directions.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        gh: Geohash</span>
+<span class="sd">        bits: Precision for geohash.</span>
+<span class="sd">        shifts: 2-dimensional array with number of windows too shift in x- and y-direction. Can be negative. The first dimension represents a number of shifts, while the second dimension is the x- and y-shift.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ghs: Array of shifted geohashes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ghs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shifts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">unwidened_gh</span> <span class="o">=</span> <span class="n">unwiden</span><span class="p">(</span><span class="n">gh</span><span class="p">)</span>
+    <span class="n">unwidened_shifted_gh</span> <span class="o">=</span> <span class="n">unwiden</span><span class="p">(</span><span class="n">gh</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">get_precision_tag</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">shifts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">bits</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sx</span> <span class="o">=</span> <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">sy</span> <span class="o">=</span> <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sx</span> <span class="o">=</span> <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">sy</span> <span class="o">=</span> <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ghs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">widen</span><span class="p">(</span><span class="n">unwidened_shifted_gh</span> <span class="o">+</span> <span class="n">sy</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span> <span class="o">|</span> <span class="n">widen</span><span class="p">(</span><span class="n">unwidened_gh</span> <span class="o">+</span> <span class="n">sx</span><span class="p">))</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">bits</span><span class="p">)</span> <span class="o">|</span> <span class="n">precision</span>
+    <span class="k">return</span> <span class="n">ghs</span></div>
+
+<div class="viewcode-block" id="window"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.window">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">window</span><span class="p">(</span><span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">minx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">180</span><span class="p">,</span> <span class="n">maxx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">miny</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">maxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Gets the width and height of a geohash window for given precision and area size.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        bits: Precision for geohash.</span>
+<span class="sd">        minx: Minimum x-value of the entire relevant space.</span>
+<span class="sd">        maxx: Maximum x-value of the entire relevant space.</span>
+<span class="sd">        miny: Minimum y-value of the entire relevant space.</span>
+<span class="sd">        miny: Maximum y-value of the entire relevant space.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        window_width: Width of geohash window.</span>
+<span class="sd">        window_height: Height of geohash window.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">window_height</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">**</span> <span class="p">(</span><span class="n">bits</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">maxy</span> <span class="o">-</span> <span class="n">miny</span><span class="p">)</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">minx</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">maxy</span> <span class="o">-</span> <span class="n">miny</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">bits</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">window_width</span> <span class="o">=</span> <span class="n">window_height</span> <span class="o">*</span> <span class="n">ratio</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">window_width</span> <span class="o">=</span> <span class="n">window_height</span> <span class="o">*</span> <span class="n">ratio</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">window_width</span><span class="p">,</span> <span class="n">window_height</span></div>
+
+<div class="viewcode-block" id="get_shifts"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.get_shifts">[docs]</a><span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">get_shifts</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">n_bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">minx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=-</span><span class="mi">180</span><span class="p">,</span> <span class="n">maxx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">miny</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">maxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="s1">&#39;longlat&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Gets the geohash shifts required to cover a circle (x, y) with given radius for given number of bits.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        x: x-coordinate of circle center.</span>
+<span class="sd">        y: y-coordinate of circle center.</span>
+<span class="sd">        radius: Circle radius. </span>
+<span class="sd">        bits: Precision for geohash.</span>
+<span class="sd">        minx: Minimum x-value of the entire relevant space.</span>
+<span class="sd">        maxx: Maximum x-value of the entire relevant space.</span>
+<span class="sd">        miny: Minimum y-value of the entire relevant space.</span>
+<span class="sd">        miny: Maximum y-value of the entire relevant space.</span>
+<span class="sd">        grid: The type of grid. Choose from `longlat` and `orthogonal`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        shifts: Geohash shifts required to cover circle for given number of bits.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">grid</span> <span class="o">==</span> <span class="s1">&#39;longlat&#39;</span><span class="p">:</span>
+        <span class="n">width_deg</span><span class="p">,</span> <span class="n">height_deg</span> <span class="o">=</span> <span class="n">window</span><span class="p">(</span><span class="n">n_bits</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+        <span class="n">distance_1_degree_longitude</span> <span class="o">=</span> <span class="n">DISTANCE_1_DEGREE_LATITUDE</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        
+        <span class="n">lon_distance_degrees</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">/</span> <span class="n">distance_1_degree_longitude</span>
+        <span class="n">lat_distance_degrees</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">/</span> <span class="n">DISTANCE_1_DEGREE_LATITUDE</span>
+
+        <span class="n">width_per_cell_m</span> <span class="o">=</span> <span class="n">width_deg</span> <span class="o">*</span> <span class="n">distance_1_degree_longitude</span>
+        <span class="n">height_per_cell_m</span> <span class="o">=</span> <span class="n">height_deg</span> <span class="o">*</span> <span class="n">DISTANCE_1_DEGREE_LATITUDE</span>
+
+        <span class="n">w_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lon_distance_degrees</span> <span class="o">/</span> <span class="n">width_deg</span><span class="p">)</span>
+        <span class="n">h_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lat_distance_degrees</span> <span class="o">/</span> <span class="n">height_deg</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="n">grid</span> <span class="o">==</span> <span class="s1">&#39;orthogonal&#39;</span><span class="p">:</span>
+        <span class="n">width_per_cell_m</span><span class="p">,</span> <span class="n">height_per_cell_m</span> <span class="o">=</span> <span class="n">window</span><span class="p">(</span><span class="n">n_bits</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+        
+        <span class="n">w_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">radius</span> <span class="o">/</span> <span class="n">width_per_cell_m</span><span class="p">)</span>
+        <span class="n">h_max</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">radius</span> <span class="o">/</span> <span class="n">height_per_cell_m</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;grid&#39; must be either &#39;longlat&#39; or &#39;orthogonal&#39;&quot;</span><span class="p">)</span>
+    
+    <span class="n">shifts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(((</span><span class="n">w_max</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">h_max</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">shifts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">h_max</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">w_max</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">h_max</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">w_max</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">w_max</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">h_max</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">x</span> <span class="o">*</span> <span class="n">width_per_cell_m</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">height_per_cell_m</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="o">&lt;=</span> <span class="n">radius</span><span class="p">:</span>
+                <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">]</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">shifts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">]</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">h_max</span> <span class="o">=</span> <span class="n">y</span>
+                <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">shifts</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="plot_geohash_shifts"><a class="viewcode-back" href="../../../library/geohash.html#honeybees.library.geohash.plot_geohash_shifts">[docs]</a><span class="k">def</span> <span class="nf">plot_geohash_shifts</span><span class="p">(</span><span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">4.8945</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">52.3667</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">31</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This function can be used to explore how geohashes can be used to cover a given circle. There is a trade-off between precision of the geohash, speed and how well the shifts represent a circle. This function plots a circle and geohash windows required to cover the circle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lon: Longitude of circle centre.</span>
+<span class="sd">        lat: Latitude of cirle centre.</span>
+<span class="sd">        radius: Radius of circle.</span>
+<span class="sd">        bits: Number of geohash bits used.</span>
+<span class="sd">        show: Whether to show the resulting plot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">mpatches</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Matplotlib not found, could not create plot&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">cartopy.io.img_tiles</span> <span class="kn">import</span> <span class="n">OSM</span>
+        <span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Cartopy not found, could not create plot&quot;</span><span class="p">)</span>
+    
+    <span class="n">imagery</span> <span class="o">=</span> <span class="n">OSM</span><span class="p">()</span>
+
+    <span class="n">gh</span> <span class="o">=</span> <span class="n">encode_precision</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">bits</span><span class="p">)</span>
+    <span class="n">shifts</span> <span class="o">=</span> <span class="n">get_shifts</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">bits</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">LambertAzimuthalEqualArea</span><span class="p">())</span>
+
+    <span class="n">window_width</span><span class="p">,</span> <span class="n">window_height</span> <span class="o">=</span> <span class="n">window</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span>
+
+    <span class="n">minlat</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">,</span> <span class="n">minlon</span><span class="p">,</span> <span class="n">maxlon</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">180</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sh</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">:</span>
+        <span class="n">neighbor</span> <span class="o">=</span> <span class="n">shift</span><span class="p">(</span><span class="n">gh</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">sh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sh</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">gh_lon</span><span class="p">,</span> <span class="n">gh_lat</span> <span class="o">=</span> <span class="n">decode</span><span class="p">(</span><span class="n">neighbor</span><span class="p">,</span> <span class="n">bits</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">gh_lon</span> <span class="o">&lt;</span> <span class="n">minlon</span><span class="p">:</span>
+            <span class="n">minlon</span> <span class="o">=</span> <span class="n">gh_lon</span>
+        <span class="k">if</span> <span class="n">gh_lon</span> <span class="o">&gt;</span> <span class="n">maxlon</span><span class="p">:</span>
+            <span class="n">maxlon</span> <span class="o">=</span> <span class="n">gh_lon</span>
+        <span class="k">if</span> <span class="n">gh_lat</span> <span class="o">&lt;</span> <span class="n">minlat</span><span class="p">:</span>
+            <span class="n">minlat</span> <span class="o">=</span> <span class="n">gh_lat</span>
+        <span class="k">if</span> <span class="n">gh_lat</span> <span class="o">&gt;</span> <span class="n">maxlat</span><span class="p">:</span>
+            <span class="n">maxlat</span> <span class="o">=</span> <span class="n">gh_lat</span>
+        <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mpatches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="n">gh_lon</span><span class="p">,</span> <span class="n">gh_lat</span><span class="p">),</span> <span class="n">window_width</span><span class="p">,</span> <span class="n">window_height</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">(),</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">))</span>
+
+    <span class="n">patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;#ff000088&#39;</span><span class="p">)</span>
+
+    <span class="n">maxlon</span> <span class="o">+=</span> <span class="n">window_width</span>
+    <span class="n">maxlat</span> <span class="o">+=</span> <span class="n">window_height</span>
+
+    <span class="n">latd</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxlat</span> <span class="o">-</span> <span class="n">minlat</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
+    <span class="n">lond</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxlon</span> <span class="o">-</span> <span class="n">minlon</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_extent</span><span class="p">((</span><span class="n">minlon</span> <span class="o">-</span> <span class="n">lond</span><span class="p">,</span> <span class="n">maxlon</span> <span class="o">+</span> <span class="n">lond</span><span class="p">,</span> <span class="n">minlat</span> <span class="o">-</span> <span class="n">latd</span><span class="p">,</span> <span class="n">maxlat</span> <span class="o">+</span> <span class="n">latd</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">imagery</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lon: </span><span class="si">{</span><span class="n">lon</span><span class="si">}</span><span class="s2">, lat: </span><span class="si">{</span><span class="n">lat</span><span class="si">}</span><span class="s2">, radius: </span><span class="si">{</span><span class="n">radius</span><span class="si">}</span><span class="s2">, bits: </span><span class="si">{</span><span class="n">bits</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;x-small&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="n">plot_geohash_shifts</span><span class="p">(</span><span class="n">bits</span><span class="o">=</span><span class="mi">31</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;geohash_31bits.svg&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="n">plot_geohash_shifts</span><span class="p">(</span><span class="n">bits</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;geohash_32bits.svg&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

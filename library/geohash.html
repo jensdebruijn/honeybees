@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geohash &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="copyright" title="Copyright" href="../copyright.html" />
+    <link rel="next" title="Neighbors" href="neighbors.html" />
+    <link rel="prev" title="Raster" href="raster.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../artists.html">Artists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reporting.html">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mapIO.html">MapIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="raster.html">Raster</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Geohash</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/library/geohash.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geohash">
+<h1>Geohash<a class="headerlink" href="#geohash" title="Permalink to this heading"></a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">honeybees.library.geohash</span> <span class="kn">import</span> <span class="n">plot_geohash_shifts</span>
+<span class="n">plot_geohash_shifts</span><span class="p">(</span><span class="n">bits</span><span class="o">=</span><span class="mi">31</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/geohash_31bits.svg" class="align-center" src="../_images/geohash_31bits.svg" /><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">honeybees.library.geohash</span> <span class="kn">import</span> <span class="n">plot_geohash_shifts</span>
+<span class="n">plot_geohash_shifts</span><span class="p">(</span><span class="n">bits</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/geohash_32bits.svg" class="align-center" src="../_images/geohash_32bits.svg" /><span class="target" id="module-honeybees.library.geohash"></span><p>Submodule that implements several functions for geohashing. Inspired by <a class="reference external" href="https://www.factual.com/blog/how-geohashes-work/">https://www.factual.com/blog/how-geohashes-work/</a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.decode">
+<span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.decode" title="Permalink to this definition"></a></dt>
+<dd><p>Decodes a geohashes into x/y pair for given precision in bits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gh</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code>) – Geohash</p></li>
+<li><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Precision for geohash.</p></li>
+<li><p><strong>minx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum x-value of the entire relevant space.</p></li>
+<li><p><strong>maxx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Maximum x-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum y-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> – Maximum y-value of the entire relevant space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>x</strong> – Decoded x-value</p></li>
+<li><p><strong>y</strong> – Decoded y-value</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.encode" title="Permalink to this definition"></a></dt>
+<dd><p>Geohashes a x/y pair.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – x-value.</p></li>
+<li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – y-value.</p></li>
+<li><p><strong>minx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum x-value of the entire relevant space.</p></li>
+<li><p><strong>maxx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Maximum x-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum y-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> – Maximum y-value of the entire relevant space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>geohash</strong> – Geohash for x/y pair.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.encode_locations">
+<span class="sig-name descname"><span class="pre">encode_locations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#encode_locations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.encode_locations" title="Permalink to this definition"></a></dt>
+<dd><p>Geohash 2d-array of locations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>locations</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – 2d array of locations x and y locations.</p></li>
+<li><p><strong>minx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Minimum x-value of the entire relevant space.</p></li>
+<li><p><strong>maxx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Maximum x-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Minimum y-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> – Maximum y-value of the entire relevant space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>hashcodes</strong> – Geohash codes array for all locations.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.encode_precision">
+<span class="sig-name descname"><span class="pre">encode_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#encode_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.encode_precision" title="Permalink to this definition"></a></dt>
+<dd><p>Geohashes a x/y pair for given precision in bits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – x-value.</p></li>
+<li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – y-value.</p></li>
+<li><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Precision for geohash.</p></li>
+<li><p><strong>minx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum x-value of the entire relevant space.</p></li>
+<li><p><strong>maxx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Maximum x-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum y-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> – Maximum y-value of the entire relevant space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>geohash</strong> – Geohash for x/y pair.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.get_precision_tag">
+<span class="sig-name descname"><span class="pre">get_precision_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#get_precision_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.get_precision_tag" title="Permalink to this definition"></a></dt>
+<dd><p>Get a 64-bit integer that can be ORed with a geohash. This is done by setting the most-significant bit to 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of bits wanted for resulting geohash.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>precision_tag</strong> – 64-bit integer that can be ORed with geohash to set precision.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.get_shifts">
+<span class="sig-name descname"><span class="pre">get_shifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'longlat'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#get_shifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.get_shifts" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the geohash shifts required to cover a circle (x, y) with given radius for given number of bits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – x-coordinate of circle center.</p></li>
+<li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – y-coordinate of circle center.</p></li>
+<li><p><strong>radius</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Circle radius.</p></li>
+<li><p><strong>bits</strong> – Precision for geohash.</p></li>
+<li><p><strong>minx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Minimum x-value of the entire relevant space.</p></li>
+<li><p><strong>maxx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Maximum x-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Minimum y-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> – Maximum y-value of the entire relevant space.</p></li>
+<li><p><strong>grid</strong> – The type of grid. Choose from <cite>longlat</cite> and <cite>orthogonal</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>shifts</strong> – Geohash shifts required to cover circle for given number of bits.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.plot_geohash_shifts">
+<span class="sig-name descname"><span class="pre">plot_geohash_shifts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.8945</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">52.3667</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">31</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#plot_geohash_shifts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.plot_geohash_shifts" title="Permalink to this definition"></a></dt>
+<dd><p>This function can be used to explore how geohashes can be used to cover a given circle. There is a trade-off between precision of the geohash, speed and how well the shifts represent a circle. This function plots a circle and geohash windows required to cover the circle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Longitude of circle centre.</p></li>
+<li><p><strong>lat</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Latitude of cirle centre.</p></li>
+<li><p><strong>radius</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Radius of circle.</p></li>
+<li><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of geohash bits used.</p></li>
+<li><p><strong>show</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to show the resulting plot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.reduce_precision">
+<span class="sig-name descname"><span class="pre">reduce_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geohashes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#reduce_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.reduce_precision" title="Permalink to this definition"></a></dt>
+<dd><p>Reduces the precision of input geohashes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geohashes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Array of geohashes.</p></li>
+<li><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Required number of bits for output geohashes</p></li>
+<li><p><strong>inplace</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If true, the operation is executed in place, otherwise a new array is returned.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.shift">
+<span class="sig-name descname"><span class="pre">shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#shift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.shift" title="Permalink to this definition"></a></dt>
+<dd><p>Shifts a geohash by number of windows in given x and y-direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gh</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code>) – Geohash</p></li>
+<li><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Precision for geohash.</p></li>
+<li><p><strong>dx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of windows to shift in x-direction. Can be negative.</p></li>
+<li><p><strong>negative.</strong> (<em>dy. Number of windows to shift in y-direction. Can be</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gh</strong> – Shifted geohash.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.shift_multiple">
+<span class="sig-name descname"><span class="pre">shift_multiple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shifts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#shift_multiple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.shift_multiple" title="Permalink to this definition"></a></dt>
+<dd><p>Shifts a geohash by number of windows in given x and y-directions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gh</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code>) – Geohash</p></li>
+<li><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Precision for geohash.</p></li>
+<li><p><strong>shifts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – 2-dimensional array with number of windows too shift in x- and y-direction. Can be negative. The first dimension represents a number of shifts, while the second dimension is the x- and y-shift.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ghs</strong> – Array of shifted geohashes.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.unwiden">
+<span class="sig-name descname"><span class="pre">unwiden</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bitstring</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#unwiden"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.unwiden" title="Permalink to this definition"></a></dt>
+<dd><p>To unpack a geohash in its x and y pair, the inverse of widen needs to happen. This function removes a bit from the left of each other bit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bitstring</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code>) – Widened bitstring.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>unwidened_bitstring</strong> – Unwidened bitstring.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.widen">
+<span class="sig-name descname"><span class="pre">widen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bitstring</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#widen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.widen" title="Permalink to this definition"></a></dt>
+<dd><p>To interleave the x and y pair of the geohash we <cite>widen</cite> the bit-values by inserting a 0 value to the left of each of the bits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>bitstring</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code>) – Geohash of x or y only.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>interleaved_bitstring</strong> – Interleaved geohash of x or y.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int64</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="honeybees.library.geohash.window">
+<span class="sig-name descname"><span class="pre">window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">180</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/honeybees/library/geohash.html#window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.library.geohash.window" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the width and height of a geohash window for given precision and area size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bits</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Precision for geohash.</p></li>
+<li><p><strong>minx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum x-value of the entire relevant space.</p></li>
+<li><p><strong>maxx</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Maximum x-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Minimum y-value of the entire relevant space.</p></li>
+<li><p><strong>miny</strong> – Maximum y-value of the entire relevant space.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>window_width</strong> – Width of geohash window.</p></li>
+<li><p><strong>window_height</strong> – Height of geohash window.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="raster.html" class="btn btn-neutral float-left" title="Raster" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="neighbors.html" class="btn btn-neutral float-right" title="Neighbors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>honeybees.library.raster &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../../copyright.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../artists.html">Artists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reporting.html">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/mapIO.html">MapIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/raster.html">Raster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/geohash.html">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>honeybees.library.raster</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for honeybees.library.raster</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">rasterio.transform</span> <span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span> <span class="nn">rasterio.profiles</span> <span class="kn">import</span> <span class="n">Profile</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span><span class="p">,</span> <span class="n">prange</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">rasterio.windows</span> <span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span> <span class="nn">rasterio.io</span> <span class="kn">import</span> <span class="n">DatasetReader</span>
+<span class="kn">from</span> <span class="nn">netCDF4</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">date2num</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<div class="viewcode-block" id="reproject_pixel"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.reproject_pixel">[docs]</a><span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">reproject_pixel</span><span class="p">(</span><span class="n">gt_from</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">gt_to</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">px_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">py_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Reproject pixel.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        gt_from: Orginal geotransformation.</span>
+<span class="sd">        gt_to: Target geotransformation.</span>
+<span class="sd">        px_in: Input xpixel.</span>
+<span class="sd">        py_in: Input ypixel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">px_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">gt_from</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt_from</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">px_in</span> <span class="o">-</span> <span class="n">gt_to</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt_to</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">py_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">gt_from</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt_from</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">py_in</span> <span class="o">-</span> <span class="n">gt_to</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt_to</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">px_out</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">py_out</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="pixel_to_coord"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.pixel_to_coord">[docs]</a><span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">pixel_to_coord</span><span class="p">(</span><span class="n">px</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">py</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Converts pixel (x, y) to coordinate (lon, lat) for given geotransformation.</span>
+<span class="sd">    Uses the upper left corner of the pixel. To use the center, add 0.5 to input pixel.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            pixel: the pixel (x, y) that need to be transformed to coordinate</span>
+<span class="sd">            gt: the geotransformation. Must be unrotated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array: the coordinate (lon, lat)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">gt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">px</span> <span class="o">*</span> <span class="n">gt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">py</span> <span class="o">*</span> <span class="n">gt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot convert rotated maps&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="pixels_to_coords"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.pixels_to_coords">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">pixels_to_coords</span><span class="p">(</span><span class="n">pixels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Converts pixels (x, y) to coordinates (lon, lat) for given geotransformation.</span>
+<span class="sd">    Uses the upper left corner of the pixels. To use the centers, add 0.5 to input pixels.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            pixels: the pixels (x, y) that need to be transformed to coordinates (shape: 2, n)</span>
+<span class="sd">            gt: the geotransformation. Must be unrotated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array: the coordinates (lon, lat) (shape: 2, n)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">pixels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">gt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">pixels</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pixels</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">gt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pixels</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">gt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">coords</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot convert rotated maps&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="coord_to_pixel"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.coord_to_pixel">[docs]</a><span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">coord_to_pixel</span><span class="p">(</span><span class="n">coord</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Converts coordinate to pixel (x, y) for given geotransformation.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            coord: the coordinate (lon, lat) that need to be transformed to pixel</span>
+<span class="sd">            gt: the geotransformation. Must be unrotated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array: tuple of pixel (x, y)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">gt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">px</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">gt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">py</span> <span class="o">=</span> <span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">gt</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="n">gt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">px</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">py</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot convert rotated maps&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="coords_to_pixels"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.coords_to_pixels">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">coords_to_pixels</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Converts array of coordinates to array of pixels for given geotransformation.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            coords: the coordinates (lon, lat) that need to be transformed to pixels (shape: 2, n)</span>
+<span class="sd">            gt: the geotransformation. Must be unrotated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array: 2d-array of pixels per coordinate (shape: 2, n)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">gt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_offset</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_offset</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">x_step</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">y_step</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">pxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">pys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">pxs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x_offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">x_step</span><span class="p">)</span>
+            <span class="n">pys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">y_step</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pxs</span><span class="p">,</span> <span class="n">pys</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot convert rotated maps&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sample_from_map"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.sample_from_map">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">sample_from_map</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Sample coordinates from a map. Can handle multiple dimensions.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            array: the map to sample from (2+n dimensions)</span>
+<span class="sd">            coords: the coordinates used to sample (shape: 2, m)</span>
+<span class="sd">            gt: the geotransformation. Must be unrotated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array: values per coordinate</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">gt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x_offset</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_offset</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">x_step</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">y_step</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">y_step</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x_offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">x_step</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">values</span></div>
+
+
+<div class="viewcode-block" id="write_to_array"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.write_to_array">[docs]</a><span class="nd">@njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Writing to an array cannot be parallelized as race conditions would occur.</span>
+<span class="k">def</span> <span class="nf">write_to_array</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">gt</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Write values using coordinates to a map. If multiple coordinates map to a single cell,</span>
+<span class="sd">    the values are added. The operation is inplace</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            array: the 2-dimensional array to write to</span>
+<span class="sd">            values: the values to write (shape: n)</span>
+<span class="sd">            coords: the coordinates of the values (shape: 2, n)</span>
+<span class="sd">            gt: the geotransformation. Must be unrotated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            array: the array with the values added (operation is inplace)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">gt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">gt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">x_offset</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_offset</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">x_step</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">y_step</span> <span class="o">=</span> <span class="n">gt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">array</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">y_step</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x_offset</span><span class="p">)</span> <span class="o">/</span> <span class="n">x_step</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">array</span></div>
+
+<div class="viewcode-block" id="clip_to_xy_bounds"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.clip_to_xy_bounds">[docs]</a><span class="k">def</span> <span class="nf">clip_to_xy_bounds</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">DatasetReader</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="n">Profile</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xmin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xmax</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ymin</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ymax</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Clips rasterio dataset to given bounds.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: Rasterio dataset.</span>
+<span class="sd">        profile: Rasterio profile of dataset.</span>
+<span class="sd">        array: Array to clip.</span>
+<span class="sd">        xmin: Minimum xbound.</span>
+<span class="sd">        xmax: Maximum xbound.</span>
+<span class="sd">        ymin: Minimum ybound.</span>
+<span class="sd">        ymax: Maximum ybound.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        profile: Updated profile for cut array.</span>
+<span class="sd">        array: Array data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">Window</span><span class="o">.</span><span class="n">from_slices</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">),</span> <span class="nb">slice</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">))</span>
+    <span class="n">profile</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s1">&#39;transform&#39;</span><span class="p">:</span> <span class="n">src</span><span class="o">.</span><span class="n">window_transform</span><span class="p">(</span><span class="n">window</span><span class="p">),</span>
+        <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">height</span><span class="p">),</span>
+        <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">window</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">profile</span><span class="p">,</span> <span class="n">array</span><span class="p">[</span><span class="n">ymin</span><span class="p">:</span><span class="n">ymax</span><span class="p">,</span> <span class="n">xmin</span><span class="p">:</span><span class="n">xmax</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="clip_to_other"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.clip_to_other">[docs]</a><span class="k">def</span> <span class="nf">clip_to_other</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">src_profile</span><span class="p">:</span> <span class="n">Profile</span><span class="p">,</span> <span class="n">other_profile</span><span class="p">:</span> <span class="n">Profile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Profile</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Clip array to rasterio profile.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        array: Array to clip.</span>
+<span class="sd">        src_profile: Rasterio profile of source array.</span>
+<span class="sd">        other_profile: Rasterio profile of array to clip to.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        outarray: Clipped array.</span>
+<span class="sd">        profile: Updated profile.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">xmin</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">other_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span> <span class="n">src_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">src_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xmin</span><span class="p">)</span> <span class="o">==</span> <span class="n">xmin</span>  <span class="c1"># assert xmin is positive</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">other_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">f</span> <span class="o">-</span> <span class="n">src_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">f</span><span class="p">)</span> <span class="o">/</span> <span class="n">src_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ymin</span><span class="p">)</span> <span class="o">==</span> <span class="n">ymin</span>  <span class="c1"># assert ymin is positive</span>
+    
+    <span class="n">profile</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">src_profile</span><span class="p">)</span>
+    <span class="n">profile</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s1">&#39;transform&#39;</span><span class="p">:</span> <span class="n">other_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="n">other_profile</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="n">other_profile</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+    <span class="p">})</span>
+    <span class="n">outarray</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">ymin</span><span class="p">:</span><span class="n">ymin</span><span class="o">+</span><span class="n">other_profile</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">],</span> <span class="n">xmin</span><span class="p">:</span><span class="n">xmin</span><span class="o">+</span><span class="n">other_profile</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">outarray</span><span class="p">,</span> <span class="n">profile</span></div>
+
+<div class="viewcode-block" id="upscale"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.upscale">[docs]</a><span class="k">def</span> <span class="nf">upscale</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">src_profile</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">factor</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Profile</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;&quot;Upscale array and rasterio profile by x amount.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        array: Array to upscale.</span>
+<span class="sd">        src_profile: Rasterio profile of source array.</span>
+<span class="sd">        factor: Factor by which to upscale.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        array: Upscaled array.</span>
+<span class="sd">        profile: Updated rasterio profile.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">src_profile</span><span class="p">)</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">src_profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span>
+    <span class="n">profile</span><span class="p">[</span><span class="s1">&#39;transform&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Affine</span><span class="p">(</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">a</span> <span class="o">/</span> <span class="n">factor</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">b</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">c</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">e</span> <span class="o">/</span> <span class="n">factor</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">f</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">profile</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">=</span><span class="n">src_profile</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span>
+    <span class="n">profile</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_profile</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">array</span><span class="p">,</span> <span class="n">profile</span></div>
+
+<div class="viewcode-block" id="NetCDFHasEmtpyLayersException"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.NetCDFHasEmtpyLayersException">[docs]</a><span class="k">class</span> <span class="nc">NetCDFHasEmtpyLayersException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+   <span class="sd">&quot;&quot;&quot;Raised when one or more layers are empty&quot;&quot;&quot;</span>
+   <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="CreateNetCDF"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.CreateNetCDF">[docs]</a><span class="k">class</span> <span class="nc">CreateNetCDF</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class to create easy create a spatial NetCDF-file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fn: Filepath.</span>
+<span class="sd">        title: Title of NetCDF.</span>
+<span class="sd">        source: Source of data.</span>
+<span class="sd">        institution: Institution where data was created.</span>
+<span class="sd">        n_timesteps: Number of timesteps in NetCDF. None if NetCDF should not have time dimension.</span>
+<span class="sd">        lons: Array of longitudes.</span>
+<span class="sd">        lats: Array of latitudes.</span>
+<span class="sd">        epsg: EPSG code.</span>
+<span class="sd">        varname: Name of variable to store.</span>
+<span class="sd">        units: Unit of variable.</span>
+<span class="sd">        dtype: NetCDF dtype. See NetCDF documentation for valid dtypes: https://unidata.github.io/netcdf4-python/</span>
+<span class="sd">        chunksizes: Sizes of datachunks. (time, lat, lon) if time dimension exists, otherwise (lat, lon).</span>
+<span class="sd">        fill_value: Value to represent nodata.</span>
+<span class="sd">        compression_level: NetCDF compression level (1-9)</span>
+<span class="sd">        comment: Optional dataset comment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">institution</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">n_timesteps</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">lons</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">lats</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">epsg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">chunksizes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">compression_level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="n">fp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">set_always_mask</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">date_created</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">institution</span> <span class="o">=</span> <span class="n">institution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">Conventions</span> <span class="o">=</span> <span class="s1">&#39;CF-1.6&#39;</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        
+        <span class="k">if</span> <span class="n">n_timesteps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lats</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lons</span><span class="p">))</span>
+
+        <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;f8&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">,))</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;latitude&#39;</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;degrees_north&#39;</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+        <span class="n">lat</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">lats</span>
+
+        <span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span> <span class="s1">&#39;f8&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">,))</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;longitude&#39;</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;degrees_east&#39;</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
+        <span class="n">lon</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">lons</span>
+        
+        <span class="n">crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;spatial_ref&#39;</span><span class="p">,</span> <span class="s1">&#39;i4&#39;</span><span class="p">)</span>
+        <span class="n">crs</span><span class="o">.</span><span class="n">spatial_ref</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span><span class="o">.</span><span class="n">to_wkt</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">n_timesteps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;hours since 1970-01-01 00:00:00&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="s1">&#39;gregorian&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="n">varname</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">dimensions</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">n_timesteps</span> <span class="k">else</span> <span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span><span class="p">),</span>
+            <span class="n">chunksizes</span><span class="o">=</span><span class="n">chunksizes</span><span class="p">,</span>
+            <span class="n">zlib</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">compression_level</span><span class="p">),</span>
+            <span class="n">complevel</span><span class="o">=</span><span class="n">compression_level</span><span class="p">,</span>  <span class="c1"># ignored if zlib is False</span>
+            <span class="n">contiguous</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># do not neccesarily store contiguous on disk</span>
+            <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="n">varname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_timestep</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="CreateNetCDF.write"><a class="viewcode-back" href="../../../library/raster.html#honeybees.library.raster.CreateNetCDF.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="n">datetime</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Write layer to file.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            values: Values to write.</span>
+<span class="sd">            dt: Optional datetime to write. If NetCDF has no time dimension, do not write.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dt</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">dt</span> <span class="o">&gt;=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">1970</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_timestep</span><span class="p">]</span> <span class="o">=</span> <span class="n">date2num</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">calendar</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_timestep</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">values</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_timestep</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;times&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">values</span></div>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if NetCDF has no empty layers on exit.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;times&#39;</span><span class="p">):</span>
+            <span class="n">checklayer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">checklayer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">is_masked</span><span class="p">(</span><span class="n">checklayer</span><span class="p">[:]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NetCDFHasEmtpyLayersException</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

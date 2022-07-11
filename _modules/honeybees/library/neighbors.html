@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>honeybees.library.neighbors &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="copyright" title="Copyright" href="../../../copyright.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../artists.html">Artists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reporting.html">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/mapIO.html">MapIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/raster.html">Raster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/geohash.html">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../library/helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>honeybees.library.neighbors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for honeybees.library.neighbors</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">honeybees.library</span> <span class="kn">import</span> <span class="n">geohash</span>
+
+<span class="nd">@nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">find_neighbor_search_count_index</span><span class="p">(</span><span class="n">search_counts</span><span class="p">,</span> <span class="n">search_count_index</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">neighbor_search_counts_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">search_count_index</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+            <span class="n">neighbor_search_counts_index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">break</span>
+    <span class="k">return</span> <span class="n">neighbor_search_counts_index</span>
+
+<span class="nd">@nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="n">nb</span><span class="o">.</span><span class="n">uint32</span><span class="p">},</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">find_neighbors_numba</span><span class="p">(</span>
+    <span class="n">search_unique_hashcodes</span><span class="p">,</span>
+    <span class="n">find_unique_hashcodes</span><span class="p">,</span>
+    <span class="n">search_hashcodes_sort_indices</span><span class="p">,</span>
+    <span class="n">cumulative_count_per_search_hashcode</span><span class="p">,</span>
+    <span class="n">find_cumulative_counts_per_hashcode</span><span class="p">,</span>
+    <span class="n">find_search_indices</span><span class="p">,</span>
+    <span class="n">reverse_find_hashcodes_sort_indices</span><span class="p">,</span>
+    <span class="n">n_neighbor</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">,</span>
+    <span class="n">bits</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">,</span>
+    <span class="n">minx</span><span class="p">,</span>
+    <span class="n">maxx</span><span class="p">,</span>
+    <span class="n">miny</span><span class="p">,</span>
+    <span class="n">maxy</span><span class="p">,</span>
+    <span class="n">grid</span>
+<span class="p">):</span>
+    <span class="n">nanvalue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="c1"># use the maximum value of uint as nanvalue</span>
+    <span class="n">neighbors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">find_search_indices</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">n_neighbor</span><span class="p">),</span> <span class="n">nanvalue</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">n_unique_hashcodes</span> <span class="o">=</span> <span class="n">search_unique_hashcodes</span><span class="o">.</span><span class="n">size</span>
+    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">find_unique_hashcodes</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">find_hashcode</span> <span class="o">=</span> <span class="n">find_unique_hashcodes</span><span class="p">[</span><span class="n">u</span><span class="p">]</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">find_hashcode</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">minx</span><span class="o">=</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="o">=</span><span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="o">=</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="o">=</span><span class="n">maxy</span><span class="p">)</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">get_shifts</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
+        <span class="n">neighbor_geohashes</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">shift_multiple</span><span class="p">(</span><span class="n">find_hashcode</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">shifts</span><span class="p">)</span>
+        <span class="n">neighbor_geohashes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">neighbor_geohashes</span><span class="p">)</span>
+        <span class="n">search_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">neighbor_geohashes</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">search_count_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">previous_neighbor_geohash</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">neighbor_geohash</span> <span class="ow">in</span> <span class="n">neighbor_geohashes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">neighbor_geohash</span> <span class="o">==</span> <span class="n">previous_neighbor_geohash</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="n">n_unique_hashcodes</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">search_unique_hashcodes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="n">neighbor_geohash</span><span class="p">:</span>
+                    <span class="n">search_counts</span><span class="p">[</span><span class="n">search_count_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">cumulative_count_per_search_hashcode</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cumulative_count_per_search_hashcode</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+                    <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">search_count_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">search_count_index</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">search_unique_hashcodes</span><span class="p">,</span> <span class="n">neighbor_geohash</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="n">n_unique_hashcodes</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">search_counts</span><span class="p">[</span><span class="n">search_count_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">cumulative_count_per_search_hashcode</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">search_unique_hashcodes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="n">neighbor_geohash</span><span class="p">:</span>
+                    <span class="n">search_counts</span><span class="p">[</span><span class="n">search_count_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">cumulative_count_per_search_hashcode</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cumulative_count_per_search_hashcode</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+                    <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">neighbor_geohash</span> <span class="o">==</span> <span class="n">find_hashcode</span><span class="p">:</span>
+                <span class="n">self_index</span> <span class="o">=</span> <span class="n">search_count_index</span>
+            <span class="n">previous_neighbor_geohash</span> <span class="o">=</span> <span class="n">neighbor_geohash</span>
+
+        <span class="k">if</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">search_count_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">search_count_index</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">search_counts</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[:</span><span class="n">search_count_index</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">search_counts</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">search_counts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># exclude self (not a neighbor)</span>
+        <span class="n">agent_neighbors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_neighbor</span><span class="p">,</span> <span class="n">nanvalue</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_neighbors</span> <span class="o">&gt;</span> <span class="n">n_neighbor</span><span class="p">:</span>
+            <span class="c1"># To understand the algorithm need to realize that you choose a random value</span>
+            <span class="c1"># from a range that is smaller than the full range, and then after each value, you extend</span>
+            <span class="c1"># that to include one more. In the event of a collision, you can safely insert the max because it was never </span>
+            <span class="c1"># possible to include it before.</span>
+
+            <span class="c1"># The chances of a collision increase at the same rate that the number of values decreases,</span>
+            <span class="c1"># so the probability of any one number being in the result is not skewed, or biased.</span>
+            <span class="c1"># from: https://codereview.stackexchange.com/questions/61338/generate-random-numbers-without-repetitions</span>
+            <span class="k">for</span> <span class="n">neighbor_index_sorted</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">find_cumulative_counts_per_hashcode</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">find_cumulative_counts_per_hashcode</span><span class="p">[</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">neighbor_index</span> <span class="o">=</span> <span class="n">reverse_find_hashcodes_sort_indices</span><span class="p">[</span><span class="n">neighbor_index_sorted</span><span class="p">]</span>
+                <span class="n">find_agent_index</span> <span class="o">=</span> <span class="n">find_search_indices</span><span class="p">[</span><span class="n">neighbor_index_sorted</span><span class="p">]</span> <span class="o">-</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">self_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">search_counts</span><span class="p">[:</span><span class="n">self_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">J</span> <span class="o">=</span> <span class="n">n_neighbors</span> <span class="o">-</span> <span class="n">n_neighbor</span>
+
+                <span class="k">if</span> <span class="n">n_neighbor</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+                    <span class="n">selected_agents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_neighbor</span><span class="p">):</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">J</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="n">find_agent_index</span><span class="p">:</span>  <span class="c1"># ensure we do not pick the agent itself and include the last agent</span>
+                        <span class="n">r</span> <span class="o">+=</span> <span class="mi">1</span>
+                    
+                    <span class="n">neighbor_search_counts_index</span> <span class="o">=</span> <span class="n">find_neighbor_search_count_index</span><span class="p">(</span><span class="n">search_counts</span><span class="p">,</span> <span class="n">search_count_index</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">neighbor_search_counts_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">neighbor</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">neighbor</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span> <span class="o">-</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">n_neighbor</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="n">selected_agents</span><span class="p">:</span>
+                            <span class="n">r</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="n">find_agent_index</span><span class="p">:</span>   <span class="c1"># ensure we do not pick the agent itself and include the last agent</span>
+                                <span class="n">r</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">neighbor_search_counts_index</span> <span class="o">=</span> <span class="n">find_neighbor_search_count_index</span><span class="p">(</span><span class="n">search_counts</span><span class="p">,</span> <span class="n">search_count_index</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">neighbor_search_counts_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">neighbor</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">neighbor</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span> <span class="o">-</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                        <span class="n">selected_agents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">neighbor</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>   
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">agent_neighbors</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="n">neighbor</span><span class="p">:</span>
+                                <span class="n">r</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="n">find_agent_index</span><span class="p">:</span>   <span class="c1"># ensure we do not pick the agent itself and include the last agent</span>
+                                    <span class="n">r</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">neighbor_search_counts_index</span> <span class="o">=</span> <span class="n">find_neighbor_search_count_index</span><span class="p">(</span><span class="n">search_counts</span><span class="p">,</span> <span class="n">search_count_index</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">neighbor_search_counts_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="n">neighbor</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">neighbor</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span> <span class="o">-</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">neighbor_search_counts_index</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                                <span class="k">break</span>                            
+                    <span class="n">agent_neighbors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">neighbor</span>
+
+                    <span class="n">J</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">agent_neighbors</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">agent_neighbors</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nanvalue</span><span class="p">:</span>
+                        <span class="n">neighbors</span><span class="p">[</span><span class="n">neighbor_index</span><span class="p">,</span> <span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">search_hashcodes_sort_indices</span><span class="p">[</span><span class="n">agent_neighbors</span><span class="p">[</span><span class="n">f</span><span class="p">]]</span>
+                <span class="n">agent_neighbors</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">nanvalue</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">neighbor_index_sorted</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">find_cumulative_counts_per_hashcode</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">find_cumulative_counts_per_hashcode</span><span class="p">[</span><span class="n">u</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">neighbor_index</span> <span class="o">=</span> <span class="n">reverse_find_hashcodes_sort_indices</span><span class="p">[</span><span class="n">neighbor_index_sorted</span><span class="p">]</span>
+                <span class="n">find_agent</span> <span class="o">=</span> <span class="n">find_search_indices</span><span class="p">[</span><span class="n">neighbor_index_sorted</span><span class="p">]</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">search_counts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">search_counts</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="mi">1</span><span class="p">]):</span>
+                        <span class="n">neighbor</span> <span class="o">=</span> <span class="n">search_counts</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">o</span>
+                        <span class="k">if</span> <span class="n">neighbor</span> <span class="o">!=</span> <span class="n">find_agent</span><span class="p">:</span>
+                            <span class="n">agent_neighbors</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">neighbor</span>
+                            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">agent_neighbors</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">agent_neighbors</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nanvalue</span><span class="p">:</span>
+                        <span class="n">neighbors</span><span class="p">[</span><span class="n">neighbor_index</span><span class="p">,</span> <span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">search_hashcodes_sort_indices</span><span class="p">[</span><span class="n">agent_neighbors</span><span class="p">[</span><span class="n">f</span><span class="p">]]</span>
+                <span class="n">agent_neighbors</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">nanvalue</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">neighbors</span>
+
+<div class="viewcode-block" id="process_hashcodes"><a class="viewcode-back" href="../../../library/neighbors.html#honeybees.library.neighbors.process_hashcodes">[docs]</a><span class="k">def</span> <span class="nf">process_hashcodes</span><span class="p">(</span><span class="n">search_hashcodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">search_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        search_hashcodes: Geohashes of agents to search.</span>
+<span class="sd">        search_ids: Ids of the agents to find neighbors for. If None, search all agents.</span>
+<span class="sd">        dtype: Datatype to use to hold indices.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        search_unique_hashcodes: Array of unique geohashes of agents.</span>
+<span class="sd">        find_unique_hashcodes: Array of unique geohashes of agents to find neighbors for.</span>
+<span class="sd">        search_hashcodes_sort_indices: Indices that can be used to sort the `search_hashcodes`.</span>
+<span class="sd">        cumulative_count_per_search_hashcode: Cumulative count of the unique search hashcodes.</span>
+<span class="sd">        find_search_indices: </span>
+<span class="sd">        find_hashcodes_sort_indices: Indices that can be used to sort the `search_hashcodes`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">search_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">search_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">search_hashcodes</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">search_ids</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+    <span class="n">search_hashcodes_sort_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">search_hashcodes</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">sorted_search_hashcodes</span> <span class="o">=</span> <span class="n">search_hashcodes</span><span class="p">[</span><span class="n">search_hashcodes_sort_indices</span><span class="p">]</span>
+    <span class="n">search_unique_hashcodes</span><span class="p">,</span> <span class="n">search_unique_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">sorted_search_hashcodes</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">search_unique_index</span> <span class="o">=</span> <span class="n">search_unique_index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">cumulative_count_per_search_hashcode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">search_unique_index</span><span class="p">,</span> <span class="n">sorted_search_hashcodes</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="n">find_hashcodes</span> <span class="o">=</span> <span class="n">search_hashcodes</span><span class="p">[</span><span class="n">search_ids</span><span class="p">]</span>
+    <span class="n">find_hashcodes_sort_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">find_hashcodes</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">search_ids_sorted_by_hashcode</span> <span class="o">=</span> <span class="n">search_ids</span><span class="p">[</span><span class="n">find_hashcodes_sort_indices</span><span class="p">]</span>
+    <span class="n">find_sorted_hashcodes</span> <span class="o">=</span> <span class="n">find_hashcodes</span><span class="p">[</span><span class="n">find_hashcodes_sort_indices</span><span class="p">]</span>
+    <span class="n">find_unique_hashcodes</span><span class="p">,</span> <span class="n">find_unique_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">find_sorted_hashcodes</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">find_unique_index</span> <span class="o">=</span> <span class="n">find_unique_index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">find_cumulative_counts_per_hashcode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">find_unique_index</span><span class="p">,</span> <span class="n">find_sorted_hashcodes</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="n">inverse_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">search_hashcodes_sort_indices</span><span class="p">)</span>
+    <span class="n">inverse_idx</span><span class="p">[</span><span class="n">search_hashcodes_sort_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inverse_idx</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">find_search_indices</span> <span class="o">=</span> <span class="n">inverse_idx</span><span class="p">[</span><span class="n">search_ids_sorted_by_hashcode</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">search_unique_hashcodes</span><span class="p">,</span>
+        <span class="n">find_unique_hashcodes</span><span class="p">,</span>
+        <span class="n">search_hashcodes_sort_indices</span><span class="p">,</span>
+        <span class="n">cumulative_count_per_search_hashcode</span><span class="p">,</span>
+        <span class="n">find_cumulative_counts_per_hashcode</span><span class="p">,</span>
+        <span class="n">find_search_indices</span><span class="p">,</span>
+        <span class="n">find_hashcodes_sort_indices</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="find_neighbors"><a class="viewcode-back" href="../../../library/neighbors.html#honeybees.library.neighbors.find_neighbors">[docs]</a><span class="k">def</span> <span class="nf">find_neighbors</span><span class="p">(</span><span class="n">locations</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">n_neighbor</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bits</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">minx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=-</span><span class="mi">180</span><span class="p">,</span> <span class="n">maxx</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">miny</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=-</span><span class="mi">90</span><span class="p">,</span> <span class="n">maxy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;longlat&#39;</span><span class="p">,</span> <span class="n">search_ids</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Finds neighbouring agents for given agents.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        locations: Either a 2-dimensional array of x and y locations for agents, or a 1-dimensional array of geohashes.</span>
+<span class="sd">        radius: Search radius. Specified in meters for grid=longlat, specified in map units for orthogonal grids.</span>
+<span class="sd">        n_neighbors: Maxiumum number of neighbors to find for each agent.</span>
+<span class="sd">        bits: Number of bits to use for geohashes.</span>
+<span class="sd">        minx: Minimum x-value of the entire relevant space.</span>
+<span class="sd">        maxx: Maximum x-value of the entire relevant space.</span>
+<span class="sd">        miny: Minimum y-value of the entire relevant space.</span>
+<span class="sd">        miny: Maximum y-value of the entire relevant space.</span>
+<span class="sd">        grid: Type of grid. Can be &#39;longlat&#39; or &#39;orthogonal&#39;.</span>
+<span class="sd">        search_ids: Only agents with given indices are searched.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        neighbors: 2-dimensional NumPy array. The first dimension represents the results for each of the agents, the second dimension the indices of the neighbors for each of those agents. -1 represents no neighbor (possible only if less than the requested number of neighbors are available in the search radius.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">locations</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">locations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="n">search_hashcodes</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">encode_locations</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
+        <span class="n">search_hashcodes</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">reduce_precision</span><span class="p">(</span><span class="n">search_hashcodes</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">locations</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">search_hashcodes</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">reduce_precision</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">search_hashcodes</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;locations must be either 2d-array with lon,lat values or 1d-array of geohashes&quot;</span><span class="p">)</span>
+
+    <span class="c1"># test if number of locations is not larger than the maximum value an uint32 can hold. -1 because the max value is used as nan</span>
+    <span class="k">if</span> <span class="n">search_hashcodes</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span>
+
+    <span class="n">search_unique_hashcodes</span><span class="p">,</span> <span class="n">find_unique_hashcodes</span><span class="p">,</span> <span class="n">search_hashcodes_sort_indices</span><span class="p">,</span> <span class="n">cumulative_count_per_search_hashcode</span><span class="p">,</span> <span class="n">find_cumulative_counts_per_hashcode</span><span class="p">,</span> <span class="n">find_search_indices</span><span class="p">,</span> <span class="n">find_hashcodes_sort_indices</span> <span class="o">=</span> <span class="n">process_hashcodes</span><span class="p">(</span><span class="n">search_hashcodes</span><span class="p">,</span> <span class="n">search_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">find_neighbors_numba</span><span class="p">(</span>
+        <span class="n">search_unique_hashcodes</span><span class="o">=</span><span class="n">search_unique_hashcodes</span><span class="p">,</span>
+        <span class="n">find_unique_hashcodes</span><span class="o">=</span><span class="n">find_unique_hashcodes</span><span class="p">,</span>
+        <span class="n">search_hashcodes_sort_indices</span><span class="o">=</span><span class="n">search_hashcodes_sort_indices</span><span class="p">,</span>
+        <span class="n">cumulative_count_per_search_hashcode</span><span class="o">=</span><span class="n">cumulative_count_per_search_hashcode</span><span class="p">,</span>
+        <span class="n">find_cumulative_counts_per_hashcode</span><span class="o">=</span><span class="n">find_cumulative_counts_per_hashcode</span><span class="p">,</span>
+        <span class="n">find_search_indices</span><span class="o">=</span><span class="n">find_search_indices</span><span class="p">,</span>
+        <span class="n">reverse_find_hashcodes_sort_indices</span><span class="o">=</span><span class="n">find_hashcodes_sort_indices</span><span class="p">,</span>
+        <span class="n">n_neighbor</span><span class="o">=</span><span class="n">n_neighbor</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
+        <span class="n">bits</span><span class="o">=</span><span class="n">bits</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">minx</span><span class="o">=</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="o">=</span><span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="o">=</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="o">=</span><span class="n">maxy</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span>
+    <span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">mpatches</span>
+
+    <span class="n">n_locations</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="mi">5000</span>
+    <span class="n">n_neighbor</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">bits</span> <span class="o">=</span> <span class="mi">29</span>
+
+    <span class="n">locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="n">n_locations</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_locations</span><span class="p">)]</span>
+    <span class="n">search_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_locations</span><span class="p">),</span> <span class="mi">50</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_locations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="n">neighors</span> <span class="o">=</span> <span class="n">find_neighbors</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">n_neighbor</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">search_ids</span><span class="o">=</span><span class="n">search_ids</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="n">neighors</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">neighors</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">neighbor</span> <span class="o">!=</span> <span class="mi">4294967295</span><span class="p">:</span>
+                <span class="n">counts</span><span class="p">[</span><span class="n">neighbor</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+    <span class="n">window_width</span><span class="p">,</span> <span class="n">window_height</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">agent</span><span class="p">,</span> <span class="n">agent_neighbors</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">search_ids</span><span class="p">,</span> <span class="n">neighors</span><span class="p">):</span>
+        <span class="n">agent_neighbors</span> <span class="o">=</span> <span class="n">agent_neighbors</span><span class="p">[</span><span class="n">agent_neighbors</span> <span class="o">!=</span> <span class="mi">4294967295</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">agent_neighbors</span><span class="p">)</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">agent_neighbors</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">geohash_coord</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">geohash</span><span class="o">.</span><span class="n">encode_precision</span><span class="p">(</span><span class="o">*</span><span class="n">locations</span><span class="p">[</span><span class="n">agent</span><span class="p">],</span> <span class="n">bits</span><span class="p">),</span> <span class="n">bits</span><span class="p">)</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">get_shifts</span><span class="p">(</span><span class="n">geohash_coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">geohash_coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">radius</span><span class="p">,</span> <span class="n">bits</span><span class="p">)</span>
+        <span class="n">neighbor_geohashes</span> <span class="o">=</span> <span class="n">geohash</span><span class="o">.</span><span class="n">shift_multiple</span><span class="p">(</span><span class="n">geohash</span><span class="o">.</span><span class="n">encode_precision</span><span class="p">(</span><span class="o">*</span><span class="n">locations</span><span class="p">[</span><span class="n">agent</span><span class="p">],</span> <span class="n">bits</span><span class="p">),</span> <span class="n">bits</span><span class="p">,</span> <span class="n">shifts</span><span class="p">)</span>
+        <span class="n">neighbor_geohashes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">neighbor_geohashes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">neighbor_geohash</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">neighbor_geohashes</span><span class="p">):</span>
+            <span class="n">patch</span> <span class="o">=</span> <span class="n">mpatches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">geohash</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">neighbor_geohash</span><span class="p">,</span> <span class="n">bits</span><span class="p">),</span> <span class="n">window_width</span><span class="p">,</span> <span class="n">window_height</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">j</span><span class="o">/</span><span class="n">neighbor_geohashes</span><span class="o">.</span><span class="n">size</span><span class="o">*</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="n">agent</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="n">agent_neighbors</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">agent</span> <span class="o">!=</span> <span class="n">neighbor</span>
+            <span class="n">neighborloc</span> <span class="o">=</span> <span class="n">locations</span><span class="p">[</span><span class="n">neighbor</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">neighborloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">neighborloc</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">locations</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">locations</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">counts</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">locations</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">locations</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="../../../copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

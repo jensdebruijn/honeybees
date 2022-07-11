@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporting &mdash; Honeybees 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="Command line arguments" href="command_line_args.html" />
+    <link rel="prev" title="Artists" href="artists.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Honeybees
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent_agent_interaction.html">Agent-agent interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="agent_environment_interaction.html">Agent-environment interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualisation.html">Visualisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="artists.html">Artists</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reporting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command_line_args.html">Command line arguments</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="library/mapIO.html">MapIO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library/raster.html">Raster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library/geohash.html">Geohash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library/neighbors.html">Neighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library/math.html">Math</a></li>
+<li class="toctree-l1"><a class="reference internal" href="library/helpers.html">Helpers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authors_page.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Honeybees</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Reporting</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/reporting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-honeybees.reporter">
+<span id="reporting"></span><h1>Reporting<a class="headerlink" href="#module-honeybees.reporter" title="Permalink to this heading"></a></h1>
+<p>This module is used to report data to the disk and to extract data for visualisation. After initialization of the reporter in the model, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">honeybees.report.Reporter.step()</span></code> method is called every timestep, which can obtain data from the agents, and report to disk or save the data for visualiation or writing to disk once the model is finished. The variables to be reported can be configured in the config file. All data is saved to the report folder by default.</p>
+<p>In the configuration file you can specify which data should be reported. In this file you can configure which data should be saved from the model in the <cite>report</cite> folder. This should be formatted as follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><strong>report</strong>:</dt><dd><ul>
+<li><dl class="simple">
+<dt><strong>name</strong>: name of the folder to which the data is saved.</dt><dd><ul>
+<li><p><strong>type</strong>: agent type e.g., farmer. Should be identical to attribute name in Agents class.</p></li>
+<li><p><strong>function</strong>: whether to use a function to parse the data. ‘null’ means the data is saved literally, ‘mean’ takes the mean etc. Options are sum/mean.</p></li>
+<li><p><strong>varname</strong>: attribute name of variable in agent class.</p></li>
+<li><p><strong>format</strong>: format to save to. Can be ‘csv’ to save to csv-file per timestep, or ‘npy’ to save in NumPy binary format.</p></li>
+<li><p><strong>initial_only</strong>: if true only save the data for the first timestep.</p></li>
+<li><p><strong>save</strong>: save variable in model run, or export, or both (save/save+export/export).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>name2</strong>:</dt><dd><ul>
+<li><p>…</p></li>
+<li><p>…</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>…</strong>:</dt><dd><ul>
+<li><p>…</p></li>
+<li><p>…</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Reporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subfolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter" title="Permalink to this definition"></a></dt>
+<dd><p>This class is used to report data to disk or for visualisation. The <cite>step</cite> method is called each timestep from the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – The model.</p></li>
+<li><p><strong>subfolder</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Optional name of the subfolder to be reported in. By default the report folder from the configuration file is used (general:report_folder).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.check_value">
+<span class="sig-name descname"><span class="pre">check_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.check_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.check_value" title="Permalink to this definition"></a></dt>
+<dd><p>Check whether the value is a Python integer or float, and is not infinite.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – The value to be checked.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.export_value">
+<span class="sig-name descname"><span class="pre">export_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.export_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.export_value" title="Permalink to this definition"></a></dt>
+<dd><p>Exports an array of values to the export folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the value to be exported.</p></li>
+<li><p><strong>value</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – The array itself.</p></li>
+<li><p><strong>conf</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Configuration for saving the file. Contains options such a file format, and whether to export the array in this timestep at all.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.extract_agent_data">
+<span class="sig-name descname"><span class="pre">extract_agent_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.extract_agent_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.extract_agent_data" title="Permalink to this definition"></a></dt>
+<dd><p>This method is used to extract agent data and apply the relevant function to the given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the data to report.</p></li>
+<li><p><strong>conf</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary with report configuration for values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.maybe_create_export_folder">
+<span class="sig-name descname"><span class="pre">maybe_create_export_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.maybe_create_export_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.maybe_create_export_folder" title="Permalink to this definition"></a></dt>
+<dd><p>If required, create folder export folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.mean_per_ID">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_per_ID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.mean_per_ID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.mean_per_ID" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the mean value per group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array of values.</p></li>
+<li><p><strong>group_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Group IDs for each value. Must be same size as values.</p></li>
+<li><p><strong>n_groups</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The total number of groups.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>mean_per_ID</strong> – The mean value for each of the groups.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.parse_agent_data">
+<span class="sig-name descname"><span class="pre">parse_agent_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.parse_agent_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.parse_agent_data" title="Permalink to this definition"></a></dt>
+<dd><p>This method is used to apply the relevant function to the given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the data to report.</p></li>
+<li><p><strong>values</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – Numpy array of values.</p></li>
+<li><p><strong>agents</strong> – The relevant agent class.</p></li>
+<li><p><strong>conf</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary with report configuration for values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.report">
+<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.report" title="Permalink to this definition"></a></dt>
+<dd><p>This method can be called to save the data that is currently saved in memory to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.report_value">
+<span class="sig-name descname"><span class="pre">report_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.report_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.report_value" title="Permalink to this definition"></a></dt>
+<dd><p>This method is used to save and/or export model values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]) – Name of the value to be exported.</p></li>
+<li><p><strong>value</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – The array itself.</p></li>
+<li><p><strong>conf</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Configuration for saving the file. Contains options such a file format, and whether to export the data or save the data in the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.step" title="Permalink to this definition"></a></dt>
+<dd><p>This method is called every timestep. First appends the current model time to the list of times for the reporter. Then iterates through the data to be reported on and calls the extract_agent_data method for each of them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="honeybees.reporter.Reporter.sum_per_ID">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sum_per_ID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_groups</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/honeybees/reporter.html#Reporter.sum_per_ID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#honeybees.reporter.Reporter.sum_per_ID" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the sum value per group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array of values.</p></li>
+<li><p><strong>group_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Group IDs for each value. Must be same size as values.</p></li>
+<li><p><strong>n_groups</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The total number of groups.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>sum_per_ID</strong> – The sum value for each of the groups.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="artists.html" class="btn btn-neutral float-left" title="Artists" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="command_line_args.html" class="btn btn-neutral float-right" title="Command line arguments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="copyright.html">Copyright</a> 2021, IIASA and VU-IVM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
